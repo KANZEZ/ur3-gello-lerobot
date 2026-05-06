@@ -1,0 +1,45 @@
+[project]
+name = "lerobot-ur5e-gello-dev-env"
+version = "0.1.0"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+
+dependencies = [
+    "ipykernel>=7.1.0",
+    "lerobot>=0.4.0",
+    "lerobot-camera-mujoco",
+    "lerobot-camera-zmq",
+    "lerobot-robot-sim-ur3e",
+    "lerobot-robot-ur5e",
+    "lerobot-teleoperator-gello",
+    "matplotlib>=3.10.8",
+    "msgpack>=1.0.5",
+    "seaborn>=0.13.2",
+    "websockets>=11.0",
+]
+
+[tool.setuptools.packages.find]
+include = [
+    "lerobot_camera_zmq",
+    "lerobot_camera_mujoco",
+    "lerobot_robot_sim_ur3e",
+    "lerobot_robot_ur5e",
+    "lerobot_teleoperator_gello",
+    "openpi_client",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+    "black",
+]
+
+[tool.uv.sources]
+lerobot =  { git = "https://github.com/F-Fer/lerobot_fix_batch_encoding", rev = "fix/video-batch-encoding" }
+lerobot-camera-mujoco = { path = "lerobot_camera_mujoco", editable = true }
+lerobot-camera-zmq = { path = "lerobot_camera_zmq", editable = true }
+lerobot-robot-sim-ur3e = { path = "lerobot_robot_sim_ur3e", editable = true }
+lerobot-robot-ur5e = { path = "lerobot_robot_ur5e", editable = true }
+lerobot-teleoperator-gello = { path = "lerobot_teleoperator_gello", editable = true }
