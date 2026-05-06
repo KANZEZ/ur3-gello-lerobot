@@ -1,14 +1,16 @@
 {
     "codebase_version": "v3.0",
     "robot_type": "ur3",
-    "total_episodes": 0,
-    "total_frames": 0,
-    "total_tasks": 0,
+    "total_episodes": 2,
+    "total_frames": 1422,
+    "total_tasks": 1,
     "chunks_size": 1000,
     "data_files_size_in_mb": 100,
     "video_files_size_in_mb": 500,
     "fps": 20,
-    "splits": {},
+    "splits": {
+        "train": "0:2"
+    },
     "data_path": "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
     "video_path": "videos/{video_key}/chunk-{chunk_index:03d}/file-{file_index:03d}.mp4",
     "features": {
@@ -53,7 +55,17 @@
                 "height",
                 "width",
                 "channels"
-            ]
+            ],
+            "info": {
+                "video.height": 720,
+                "video.width": 1280,
+                "video.codec": "av1",
+                "video.pix_fmt": "yuv420p",
+                "video.is_depth_map": false,
+                "video.fps": 20,
+                "video.channels": 3,
+                "has_audio": false
+            }
         },
         "observation.images.d435": {
             "dtype": "video",
@@ -66,7 +78,17 @@
                 "height",
                 "width",
                 "channels"
-            ]
+            ],
+            "info": {
+                "video.height": 480,
+                "video.width": 640,
+                "video.codec": "av1",
+                "video.pix_fmt": "yuv420p",
+                "video.is_depth_map": false,
+                "video.fps": 20,
+                "video.channels": 3,
+                "has_audio": false
+            }
         },
         "timestamp": {
             "dtype": "float32",

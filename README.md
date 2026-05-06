@@ -1,5 +1,10 @@
 # LeRobot UR5e/Gello
 
+# TODO: 
+1. Replace lerobot version to lerobot-0.5.1
+2. Add Bi-UR3 and Bi-Gello
+
+-------------------------------------------------------
 ![Thumbnail](./assets/images/banner.png)
 
 A ready-to-use [LeRobot](https://github.com/huggingface/lerobot) integration for the **UR5e** with the **GELLO** teleoperation device. Collect demonstration datasets, train VLA policies, and deploy them on real hardware through LeRobot's plugin system.
