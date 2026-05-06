@@ -1,7 +1,7 @@
 # LeRobot UR5e/Gello
 
 # TODO: 
-1. Replace lerobot version to lerobot-0.5.1
+1. Replace lerobot version to lerobot-0.5.1 and python version >=3.12
 2. Add Bi-UR3 and Bi-Gello
 
 -------------------------------------------------------
