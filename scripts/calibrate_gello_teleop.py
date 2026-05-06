@@ -14,7 +14,7 @@ from lerobot.scripts.lerobot_calibrate import CalibrateConfig, calibrate
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Calibrate the GELLO teleoperator")
     parser.add_argument("--port", required=True, help="Serial device path for the Dynamixel bus")
-    parser.add_argument("--id", default="gello_teleop", help="Identifier saved with the calibration")
+    parser.add_argument("--id", default="gello", help="Identifier saved with the calibration")
     parser.add_argument(
         "--calibration-dir",
         type=Path,

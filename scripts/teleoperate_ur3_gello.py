@@ -1,4 +1,4 @@
-"""Teleoperate the MuJoCo UR3e simulation with GELLO."""
+"""Teleoperate a physical UR3 with GELLO and two RealSense cameras."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ import logging
 from pathlib import Path
 
 import rerun as rr
+from lerobot.cameras.realsense.configuration_realsense import RealSenseCameraConfig
 from lerobot.processor import make_default_processors
 from lerobot.robots import make_robot_from_config
 from lerobot.scripts.lerobot_teleoperate import teleop_loop
@@ -15,17 +16,21 @@ from lerobot.utils.import_utils import register_third_party_devices
 from lerobot.utils.utils import init_logging
 from lerobot.utils.visualization_utils import init_rerun
 
-from lerobot_camera_mujoco import MujocoCameraConfig
-from lerobot_robot_sim_ur3e import SimUR3EConfig
+from lerobot_robot_ur3 import UR3Config
 from lerobot_teleoperator_gello import GelloConfig
 
 
+D455_SERIAL = "239222303378"
+D435_SERIAL = "317222074788"
+
+
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Teleoperate MuJoCo UR3e simulation with a GELLO leader.")
+    parser = argparse.ArgumentParser(description="Teleoperate a physical UR3 with a GELLO leader.")
+    parser.add_argument("--robot-ip", required=True, help="UR3 controller IP address.")
+    parser.add_argument("--robot-id", default="ur3", help="LeRobot id for the UR3 robot.")
     parser.add_argument("--teleop-port", default="/dev/ttyUSB0", help="GELLO Dynamixel serial port.")
     parser.add_argument("--teleop-id", default="gello", help="LeRobot id for the GELLO teleoperator.")
-    parser.add_argument("--robot-id", default="sim_ur3e", help="LeRobot id for the simulated robot.")
-    parser.add_argument("--fps", type=int, default=30, help="Control loop frequency.")
+    parser.add_argument("--fps", type=int, default=20, help="Control loop frequency.")
     parser.add_argument("--teleop-time-s", type=float, default=None, help="Optional teleoperation duration.")
     parser.add_argument(
         "--calibration-dir",
@@ -34,56 +39,47 @@ def parse_args() -> argparse.Namespace:
         help="Root directory for LeRobot calibration files.",
     )
     parser.add_argument("--display-data", action="store_true", help="Log observations and actions to Rerun.")
-    parser.add_argument("--no-cameras", action="store_true", help="Disable MuJoCo camera observations.")
-    parser.add_argument("--no-eye-in-hand", action="store_true", help="Disable the wrist eye-in-hand camera.")
-    parser.add_argument("--camera-width", type=int, default=640, help="MuJoCo camera image width.")
-    parser.add_argument("--camera-height", type=int, default=480, help="MuJoCo camera image height.")
-    parser.add_argument("--no-viewer", action="store_true", help="Do not open the MuJoCo viewer window.")
-    parser.add_argument("--collision-debug", action="store_true", help="Enable UR3 self-collision debug logging.")
-    parser.add_argument("--command-substeps", type=int, default=6, help="MuJoCo substeps for ordinary arm commands.")
-    parser.add_argument(
-        "--gripper-command-substeps",
-        type=int,
-        default=120,
-        help="MuJoCo substeps when the Robotiq gripper target changes.",
-    )
+    parser.add_argument("--no-cameras", action="store_true", help="Disable RealSense cameras.")
+    parser.add_argument("--no-gripper", action="store_true", help="Do not connect or control the Robotiq gripper.")
+    parser.add_argument("--no-reset", action="store_true", help="Do not move UR3 to configured start joints first.")
+    parser.add_argument("--gripper-speed", type=int, default=100, help="Robotiq gripper speed command, 0..255.")
+    parser.add_argument("--gripper-force", type=int, default=255, help="Robotiq gripper force command, 0..255.")
     return parser.parse_args()
 
 
-def make_mujoco_cameras(args: argparse.Namespace) -> dict[str, MujocoCameraConfig]:
-    cameras = {
-        "agentview": MujocoCameraConfig(
-            camera="agentview",
-            width=args.camera_width,
-            height=args.camera_height,
-            fps=args.fps,
-        )
+def make_realsense_cameras() -> dict[str, RealSenseCameraConfig]:
+    return {
+        "d455": RealSenseCameraConfig(
+            serial_number_or_name=D455_SERIAL,
+            width=1280,
+            height=720,
+            fps=30,
+        ),
+        "d435": RealSenseCameraConfig(
+            serial_number_or_name=D435_SERIAL,
+            width=640,
+            height=480,
+            fps=30,
+        ),
     }
-    if not args.no_eye_in_hand:
-        cameras["eye_in_hand"] = MujocoCameraConfig(
-            camera="eye_in_hand",
-            width=args.camera_width,
-            height=args.camera_height,
-            fps=args.fps,
-        )
-    return cameras
 
 
 def main() -> None:
     args = parse_args()
     init_logging()
-    logging.info("Starting GELLO <-> simulated UR3e teleoperation")
+    logging.info("Starting UR3 <-> GELLO teleoperation")
 
     register_third_party_devices()
 
-    robot_cfg = SimUR3EConfig(
+    robot_cfg = UR3Config(
+        ip=args.robot_ip,
         id=args.robot_id,
-        calibration_dir=args.calibration_dir / "robots" / "sim_ur3e",
-        cameras={} if args.no_cameras else make_mujoco_cameras(args),
-        collision_debug=args.collision_debug,
-        show_viewer=not args.no_viewer,
-        command_substeps=args.command_substeps,
-        gripper_command_substeps=args.gripper_command_substeps,
+        calibration_dir=args.calibration_dir / "robots" / "ur3",
+        cameras={} if args.no_cameras else make_realsense_cameras(),
+        with_gripper=not args.no_gripper,
+        gripper_auto_calibrate=False,
+        gripper_speed=args.gripper_speed,
+        gripper_force=args.gripper_force,
     )
     teleop_cfg = GelloConfig(
         port=args.teleop_port,
@@ -96,10 +92,14 @@ def main() -> None:
     teleop_action_processor, robot_action_processor, robot_observation_processor = make_default_processors()
 
     if args.display_data:
-        init_rerun(session_name="gello_sim_ur3e")
+        init_rerun(session_name="ur3_gello_teleoperation")
 
     try:
         robot.connect()
+        if not args.no_reset:
+            logging.info("Moving UR3 to start joints: %s", [round(value, 4) for value in robot_cfg.start_joints])
+            robot.move_to_start_joints(wait=True)
+
         teleop.connect()
         teleop_loop(
             teleop=teleop,

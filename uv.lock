@@ -1836,6 +1836,21 @@ requires-dist = [
 ]
 
 [[package]]
+name = "lerobot-robot-ur3"
+version = "0.1.0"
+source = { editable = "lerobot_robot_ur3" }
+dependencies = [
+    { name = "lerobot" },
+    { name = "ur-rtde" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "lerobot" },
+    { name = "ur-rtde", specifier = ">=1.6.2" },
+]
+
+[[package]]
 name = "lerobot-robot-ur5e"
 version = "0.1.0"
 source = { editable = "lerobot_robot_ur5e" }
@@ -1875,6 +1890,7 @@ dependencies = [
     { name = "lerobot-camera-mujoco" },
     { name = "lerobot-camera-zmq" },
     { name = "lerobot-robot-sim-ur3e" },
+    { name = "lerobot-robot-ur3" },
     { name = "lerobot-robot-ur5e" },
     { name = "lerobot-teleoperator-gello" },
     { name = "matplotlib" },
@@ -1898,6 +1914,7 @@ requires-dist = [
     { name = "lerobot-camera-mujoco", editable = "lerobot_camera_mujoco" },
     { name = "lerobot-camera-zmq", editable = "lerobot_camera_zmq" },
     { name = "lerobot-robot-sim-ur3e", editable = "lerobot_robot_sim_ur3e" },
+    { name = "lerobot-robot-ur3", editable = "lerobot_robot_ur3" },
     { name = "lerobot-robot-ur5e", editable = "lerobot_robot_ur5e" },
     { name = "lerobot-teleoperator-gello", editable = "lerobot_teleoperator_gello" },
     { name = "matplotlib", specifier = ">=3.10.8" },
